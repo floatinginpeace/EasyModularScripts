@@ -1,6 +1,6 @@
 import os
 import sys
-from openai import OpenAI
+from groq import Groq
 from dotenv import load_dotenv
 
 
@@ -14,7 +14,7 @@ def main():
     if not ask_key:
         print("Error: The ASK_KEY environment variable is not set.")
         sys.exit(1)
-    client = OpenAI(api_key=ask_key)
+    client = Groq(api_key=ask_key)
     
     # Check if a prompt argument is provided
     if len(sys.argv) < 2:
@@ -25,19 +25,20 @@ def main():
     system_prompt = "Answer in as few characters as possible. No formatting tokens such as ` or ```"
     user_prompt = ' '.join(sys.argv[1:])
     combined_prompt = f"{system_prompt}\n{user_prompt}"
-
+    
     try:
-        # Make a request to OpenAI's GPT-4 model in chat mode
+        # Make a request to Groq Llama 70b model in chat model
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="llama3-70b-8192",
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                {"role": "user",
+                 "content": f"{system_prompt}{user_prompt}"}
             ]
         )
 
         # Extract and print the response
-        response_text = response.choices[0].message.content.strip()
+        response_message = response.choices[0].message
+        response_text = response_message.content
         print(response_text)
 
         # Save the response to the last_output.log file in the ask_app_dir dir
